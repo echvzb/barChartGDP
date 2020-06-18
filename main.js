@@ -3,26 +3,45 @@ import getData from './getData.js'
 const url = "https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/GDP-data.json"
 
 const render = data => {
-    const title = 'United States GDP'
+    const title = 'United States GDP';
+    // SVG el contenedor del diagrama
     const svg = d3.select('svg');
+    // Extraemos los atributos del contenedor
     const height = svg.attr('height');
     const width = svg.attr('width');
+    /* Asignamos el margen del diagrama
+    Es importante porque guardamos espacio de:
+    Ejex X y Y
+    Titulo de Ejes
+    Titulo de diagrama
+    */
     const margin = {
         left: 110,
         right: 30,
         top: 100,
         bottom: 90
     };
+    // Asignamos el tamaño del diagrama independientemente de
+    // los ejes x y y, titulos
     const inner={
         height: height -(margin.top+margin.bottom),
         width: width -(margin.left+margin.right)
     }
+    // Asignamos en una variable los datos a visualizar
     const dataSet = data.data;
-
+    /* Asignamos en la variable xValue y yValue los datos que se van a extraer
+    En este caso:
+        valor: 
+            x: extraemos las fechas.
+            y: extraemos valor numérico, que es en el orden del billon.
+    Es importante esto, ya que se pueden cambiar las variables en este punto sin afectar
+    la lógica de armar el diagrama de barras. A menos que el eje Y NO SEAN FECHAS
+    */
     const xValue = d => d[0], yValue = d => d[1];
-
+    //Asignamos el valor máximo, que es numérico
     const maxValue = d3.max(dataSet, d => yValue(d));
-
+    /*Asignamos escalas donde:
+     */   
     const xScale = d3.scaleTime()
         .domain([d3.min(dataSet, d=> xValue(d)),d3.max(dataSet, d=> xValue(d))])
         .range([0,inner.width])
@@ -55,13 +74,20 @@ const render = data => {
     const div = d3.select("body").append("div")	
         .attr("class", "tooltip")				
         .style("opacity", 0);
+    svg.append('text')
+        .text(title)
+        .attr('class','title')
+        .attr('x', 44)
+        .attr('y', 50);
 
     g.selectAll('rect').data(dataSet)
         .enter().append('rect')
             .attr('x', d => xScale(xValue(d)))
             .attr('width', inner.width/dataSet.length)
-            .attr('height', d => inner.height-yScale(yValue(d)))
+            .attr('y', inner.height)
+            .transition().duration(1700)
             .attr('y', d => yScale(yValue(d)))
+            .attr('height', d => inner.height-yScale(yValue(d)))
             .attr('class', 'bar')
             .on('mouseover', d=>{
                 div.transition()
@@ -77,11 +103,7 @@ const render = data => {
                     .style('opacity',0)
             })
     
-    svg.append('text')
-        .text(title)
-        .attr('class','title')
-        .attr('x', 44)
-        .attr('y', 50);
+
 }
 const dateParse = d3.timeParse('%Y-%m-%d');
 getData(url).then(data =>{
