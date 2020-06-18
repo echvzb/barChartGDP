@@ -85,10 +85,6 @@ const render = data => {
             .attr('x', d => xScale(xValue(d)))
             .attr('width', inner.width/dataSet.length)
             .attr('y', inner.height)
-            .transition().duration(1700)
-            .attr('y', d => yScale(yValue(d)))
-            .attr('height', d => inner.height-yScale(yValue(d)))
-            .attr('class', 'bar')
             .on('mouseover', d=>{
                 div.transition()
                     .duration(200)
@@ -102,8 +98,10 @@ const render = data => {
                     .duration(500)
                     .style('opacity',0)
             })
-    
-
+            .transition().duration(1700)
+                .attr('y', d => yScale(yValue(d)))
+                .attr('height', d => inner.height-yScale(yValue(d)))
+                .attr('class', 'bar')
 }
 const dateParse = d3.timeParse('%Y-%m-%d');
 getData(url).then(data =>{
